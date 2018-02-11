@@ -1,19 +1,21 @@
 {
   "name": "vernam-backend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Vernam Backend API",
   "engines": {
-    "node": "5.9.1"
+    "node": "9.0.0"
   },
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "pg": "6.x",
+    "body-parser": "^1.17.1",
+    "cors": "^2.8.4",
     "ejs": "2.5.6",
     "express": "4.15.2",
-    "body-parser": "^1.17.1"
+    "express-basic-auth": "^1.1.4",
+    "pg": "6.x"
   },
   "repository": {
     "type": "git",

@@ -1,14 +1,10 @@
-drop table if exists messages;
-drop table if exists users;
+DROP TABLE IF EXISTS message;
 
-create table users (
-  phone_number text not null primary key,
-  auth_token text not null
+CREATE TABLE message (
+  sender text NOT NULL,
+  receiver text NOT NULL,
+  payload text NOT NULL,
+  timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(sender, timestamp)
 );
-create table messages (
-  id serial not null primary key,
-  sender text not null references users (phone_number) on delete cascade,
-  receiver text not null references users (phone_number) on delete cascade,
-  payload text not null,
-  timestamp timestamp not null default current_timestamp
-);
+

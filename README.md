@@ -31,3 +31,21 @@ DELETE /messages/+436801234567/1519322973101/KEY=
 Response body:
 {}
 ```
+
+## Setup
+
+Install the [Heroku client](https://devcenter.heroku.com/articles/heroku-cli) first.
+
+``` bash
+# Install dependencies
+npm install
+
+# Log into heroku with your credentials
+heroku login
+
+# Run locally on port 5000
+nodemon --exec "heroku local" --signal SIGTERM
+
+# Connect to database
+heroku pg:psql
+```

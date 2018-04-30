@@ -20,7 +20,7 @@ const client = new Client({
 
 client.connect()
 
-function returnCustomReponse(response, statusCode) {
+function returnCustomResponse(response, statusCode) {
   response.status(statusCode).json({code: statusCode, message: STATUS_CODES[statusCode]})
 }
 
@@ -41,7 +41,7 @@ app.get('/messages/:receiver', function (request, response) {
   client.query(sqlQueryString, queryParams, function (error, result) {
     if (error) {
       console.error(error)
-      returnCustomReponse(response, 400)
+      returnCustomResponse(response, 400)
     } else {
       response.json(result.rows)
     }
@@ -54,7 +54,7 @@ app.post('/messages', function (request, response) {
   client.query(sqlQueryString, queryParams, function (error, result) {
     if (error || result.rows.length <= 0) {
       console.error(error)
-      returnCustomReponse(response, 400)
+      returnCustomResponse(response, 400)
     } else {
       response.json(result.rows[0])
     }
@@ -67,7 +67,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
   client.query('SELECT payload ' + sqlSelectionString, queryParams, function (error, result) {
     if (error || result.rows.length <= 0) {
       console.error(error)
-      returnCustomReponse(response, 400)
+      returnCustomResponse(response, 400)
     } else {
       const messageWithAuthSecretEncrypted = result.rows[0].payload;
       const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(request.params.base64Key)
@@ -78,7 +78,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
       client.query('DELETE ' + sqlSelectionString, queryParams, function (error, result) {
         if (error) {
           console.error(error)
-          returnCustomReponse(response, 400)
+          returnCustomResponse(response, 400)
         } else {
           response.json({})
         }
@@ -88,7 +88,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
 })
 
 app.get('*', function (request, response) {
-  returnCustomReponse(response, 400)
+  returnCustomResponse(response, 400)
 })
 
 app.listen(app.get('port'), function () {

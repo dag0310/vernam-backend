@@ -1,8 +1,0 @@
-{
-  "name": "Vernam Backend",
-  "description": "Backend for the Vernam messenger app",
-  "repository": "https://github.com/dag0310/vernam-backend",
-  "logo": "http://node-js-sample.herokuapp.com/node.svg",
-  "keywords": ["node", "express", "api", "otp", "encryption", "messenger", "app", "perfect secrecy"],
-  "image": "heroku/nodejs"
-}

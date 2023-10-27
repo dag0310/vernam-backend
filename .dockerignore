@@ -1,5 +1,11 @@
-fly.toml
-Dockerfile
-.dockerignore
+# Node build artifacts
 node_modules
-.git
+npm-debug.log
+
+# Local development
+*.dev
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml

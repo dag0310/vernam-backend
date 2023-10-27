@@ -2,20 +2,9 @@
   "name": "vernam-backend",
   "version": "1.0.0",
   "description": "Vernam Backend API",
-  "engines": {
-    "node": "9.0.0"
-  },
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
-  },
-  "dependencies": {
-    "body-parser": "^1.17.1",
-    "cors": "^2.8.4",
-    "ejs": "2.5.6",
-    "express": "4.15.2",
-    "otp-crypto": "^4.1.0",
-    "pg": "6.x"
   },
   "repository": {
     "type": "git",
@@ -23,13 +12,21 @@
   },
   "keywords": [
     "node",
-    "heroku",
     "express",
     "otp",
     "encryption",
     "messenger",
     "app",
-    "perfect secrecy"
+    "perfect-secrecy"
   ],
-  "license": "AGPLv3"
+  "license": "AGPLv3",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "otp-crypto": "^4.1.0",
+    "pg": "^8.11.3"
+  }
 }

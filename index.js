@@ -69,7 +69,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
       console.error(error)
       returnCustomResponse(response, 400)
     } else {
-      const messageWithAuthSecretEncrypted = result.rows[0].payload;
+      const messageWithAuthSecretEncrypted = result.rows[0].payload
       const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(request.params.base64Key)
       if (OtpCrypto.decrypt(messageWithAuthSecretEncrypted, authSecretKey).plaintextDecrypted !== AUTH_SECRET) {
         response.json({})
@@ -92,8 +92,8 @@ app.get('*', function (request, response) {
 })
 
 process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
-});
+  console.error('Unhandled Rejection:', err)
+})
 
 app.listen(app.get('port'), function () {
   console.log('Node app is running on port', app.get('port'))

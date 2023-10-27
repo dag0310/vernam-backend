@@ -24,7 +24,7 @@ function returnCustomResponse(response, statusCode) {
   response.status(statusCode).json({code: statusCode, message: STATUS_CODES[statusCode]})
 }
 
-app.set('port', (process.env.PORT || '8080'))
+app.set('port', (process.env.PORT || '3000'))
 
 app.use(express.static(__dirname + '/public'))
 

@@ -91,6 +91,10 @@ app.get('*', function (request, response) {
   returnCustomResponse(response, 400)
 })
 
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+});
+
 app.listen(app.get('port'), function () {
   console.log('Node app is running on port', app.get('port'))
 })

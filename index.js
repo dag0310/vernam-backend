@@ -14,7 +14,7 @@ const client = new Client({
 
 client.connect()
 
-app.set('port', (process.env.PORT || '3000'))
+app.set('port', process.env.PORT || '3000')
 
 app.use(cors({ maxAge: 600 }))
 

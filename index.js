@@ -8,20 +8,11 @@ const app = express()
 
 const AUTH_SECRET = 'VERNAM'
 
-const STATUS_CODES = {
-  400: 'BAD REQUEST',
-  404: 'NOT FOUND'
-}
-
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
 })
 
 client.connect()
-
-function returnCustomResponse(response, statusCode) {
-  response.status(statusCode).json({code: statusCode, message: STATUS_CODES[statusCode]})
-}
 
 app.set('port', (process.env.PORT || '3000'))
 
@@ -40,7 +31,7 @@ app.get('/messages/:receiver', function (request, response) {
   client.query(sqlQueryString, queryParams, function (error, result) {
     if (error) {
       console.error(error)
-      returnCustomResponse(response, 400)
+      response.status(400).end()
     } else {
       response.json(result.rows)
     }
@@ -53,7 +44,7 @@ app.post('/messages', function (request, response) {
   client.query(sqlQueryString, queryParams, function (error, result) {
     if (error || result.rows.length <= 0) {
       console.error(error)
-      returnCustomResponse(response, 400)
+      response.status(400).end()
     } else {
       response.json(result.rows[0])
     }
@@ -66,7 +57,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
   client.query('SELECT payload ' + sqlSelectionString, queryParams, function (error, result) {
     if (error || result.rows.length <= 0) {
       console.error(error)
-      returnCustomResponse(response, 400)
+      response.status(400).end()
     } else {
       const messageWithAuthSecretEncrypted = result.rows[0].payload
       const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(request.params.base64Key)
@@ -77,7 +68,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
       client.query('DELETE ' + sqlSelectionString, queryParams, function (error, result) {
         if (error) {
           console.error(error)
-          returnCustomResponse(response, 400)
+          response.status(400).end()
         } else {
           response.json({})
         }
@@ -87,7 +78,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
 })
 
 app.get('*', function (request, response) {
-  returnCustomResponse(response, 400)
+  response.status(400).end()
 })
 
 process.on('unhandledRejection', (err) => {

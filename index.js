@@ -1,7 +1,6 @@
 const { Client } = require('pg')
 const express = require('express')
 const cors = require('cors')
-const bodyParser = require('body-parser')
 const OtpCrypto = require('otp-crypto')
 
 const app = express()
@@ -18,7 +17,7 @@ app.set('port', process.env.PORT || '3000')
 
 app.use(cors({ maxAge: 600 }))
 
-app.use(bodyParser.json())
+app.use(express.json())
 
 const timestampClause = 'floor(EXTRACT(EPOCH FROM timestamp) * 1000)'
 const sqlStringReturning = 'sender, receiver, payload, ' + timestampClause + ' AS timestamp'

@@ -1,4 +1,4 @@
-const { Client } = require('pg')
+const { Client, types } = require('pg')
 const express = require('express')
 const cors = require('cors')
 const OtpCrypto = require('otp-crypto')
@@ -6,6 +6,8 @@ const OtpCrypto = require('otp-crypto')
 const app = express()
 
 const AUTH_SECRET = 'VERNAM'
+
+types.setTypeParser(20, parseInt); // Parse timestamp to number instead of string
 
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
@@ -19,7 +21,7 @@ app.use(cors({ maxAge: 600 }))
 
 app.use(express.json())
 
-const timestampClause = 'floor(EXTRACT(EPOCH FROM timestamp) * 1000)'
+const timestampClause = 'CAST(floor(EXTRACT(EPOCH FROM timestamp) * 1000) AS BIGINT)'
 const sqlStringReturning = 'sender, receiver, payload, ' + timestampClause + ' AS timestamp'
 
 app.get('/messages/:receiver', function (request, response) {

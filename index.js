@@ -61,7 +61,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
       const messageWithAuthSecretEncrypted = result.rows[0].payload
       const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(request.params.base64Key)
       if (OtpCrypto.decrypt(messageWithAuthSecretEncrypted, authSecretKey).plaintextDecrypted !== AUTH_SECRET) {
-        response.json({})
+        response.status(200).end()
         return
       }
       client.query('DELETE ' + sqlSelectionString, queryParams, function (error, result) {
@@ -69,7 +69,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
           console.error(error)
           response.status(400).end()
         } else {
-          response.json({})
+          response.status(200).end()
         }
       })
     }

@@ -28,8 +28,7 @@ Response body:
 }
 
 DELETE /messages/bd8ebf34-4214-46a7-ab55-60c4eee0c20d/1519322973101/KEY=
-Response body:
-{}
+*No response body*
 ```
 
 ## Local development

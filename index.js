@@ -7,7 +7,7 @@ const app = express()
 
 const AUTH_SECRET = 'VERNAM'
 
-types.setTypeParser(20, parseInt); // Parse timestamp to number instead of string
+types.setTypeParser(20, parseInt); // Parse timestamp to number instead of string, type 20 = BigInt
 
 const client = new Client({
   connectionString: process.env.DATABASE_URL,

@@ -14,13 +14,18 @@
     "url": "https://github.com/dag0310/vernam-backend"
   },
   "keywords": [
-    "node",
-    "express",
-    "otp",
+    "end-to-end",
+    "e2e",
     "encryption",
     "messenger",
-    "app",
-    "perfect-secrecy"
+    "backend",
+    "api",
+    "otp",
+    "one-time-pad",
+    "perfect-secrecy",
+    "signal",
+    "whatsapp",
+    "telegram"
   ],
   "license": "AGPLv3",
   "dependencies": {

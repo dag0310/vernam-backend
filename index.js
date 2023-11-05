@@ -80,10 +80,6 @@ app.get('*', function (request, response) {
   response.status(400).end()
 })
 
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err)
-})
-
 app.listen(app.get('port'), function () {
   console.log('Node app is running on port', app.get('port'))
 })

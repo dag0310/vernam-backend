@@ -77,7 +77,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key', function (request, respons
 })
 
 app.get('*', function (request, response) {
-  response.status(400).end()
+  response.status(404).end()
 })
 
 app.listen(app.get('port'), function () {

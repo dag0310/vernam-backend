@@ -34,7 +34,7 @@ DELETE /messages/bd8ebf34-4214-46a7-ab55-60c4eee0c20d/1519322973101/KEY=
 ## Local development
 
 - Use a (local) development database. The fly.io database does not have external access enabled.
-- Start dev server: `npm run start`
+- Start dev server: `npm start`
 
 ## fly.io
 

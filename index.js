@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { Client, types } = require('pg')
 const express = require('express')
 const cors = require('cors')

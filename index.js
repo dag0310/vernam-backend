@@ -1,8 +1,10 @@
-require('dotenv').config()
-const { Client, types } = require('pg')
-const express = require('express')
-const cors = require('cors')
-const OtpCrypto = require('otp-crypto')
+import pkg from 'pg';
+import express from 'express'
+import cors from 'cors'
+import OtpCrypto from 'otp-crypto'
+import 'dotenv/config'
+
+const { Client, types } = pkg
 
 const app = express()
 

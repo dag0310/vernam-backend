@@ -89,9 +89,11 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
 
     const sqlSelectionString = 'FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' = $2'
     client.query('SELECT payload ' + sqlSelectionString, [data.sender, data.timestamp], (error, result) => {
-      if (error || result.rows.length <= 0) {
+      if (error) {
         console.error(error)
-        res.status(400).end()
+        res.status(500).end()
+      } else if (result.rows.length <= 0) {
+        res.status(404).end()
       } else {
         const messageWithAuthSecretEncrypted = result.rows[0].payload
         const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(data.base64Key)

@@ -94,7 +94,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
         const messageWithAuthSecretEncrypted = result.rows[0].payload
         const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(data.base64Key)
         if (OtpCrypto.decrypt(messageWithAuthSecretEncrypted, authSecretKey).plaintextDecrypted !== AUTH_SECRET) {
-          res.status(200).end()
+          res.status(200).end() // Do not let attacker know their supplied secret was incorrect
           return
         }
         client.query('DELETE ' + sqlSelectionString, [data.sender, data.timestamp], (error, result) => {

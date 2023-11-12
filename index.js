@@ -65,8 +65,10 @@ app.post('/messages',
 
     const sqlQueryString = 'INSERT INTO message (sender, receiver, payload) VALUES ($1, $2, $3) RETURNING ' + SQL_STRING_RETURNING
     client.query(sqlQueryString, [data.sender, data.receiver, data.payload], (error, result) => {
-      if (error || result.rows.length <= 0) {
+      if (error) {
         console.error(error)
+        res.status(500).end()
+      } else if (result.rows.length <= 0) {
         res.status(500).end()
       } else {
         res.status(201).json(result.rows[0])

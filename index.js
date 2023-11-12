@@ -45,10 +45,9 @@ app.get('/messages/:receiver',
     client.query(sqlQueryString, sqlQueryParams, (error, result) => {
       if (error) {
         console.error(error)
-        res.status(500).end()
-      } else {
-        res.status(200).json(result.rows)
+        return res.status(500).end()
       }
+      return res.status(200).json(result.rows)
     })
   })
 
@@ -67,12 +66,12 @@ app.post('/messages',
     client.query(sqlQueryString, [data.sender, data.receiver, data.payload], (error, result) => {
       if (error) {
         console.error(error)
-        res.status(500).end()
-      } else if (result.rows.length <= 0) {
-        res.status(500).end()
-      } else {
-        res.status(201).json(result.rows[0])
+        return res.status(500).end()
       }
+      if (result.rows.length <= 0) {
+        return res.status(500).end()
+      }
+      return res.status(201).json(result.rows[0])
     })
   })
 
@@ -90,30 +89,28 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
     client.query('SELECT payload FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' = $2', [data.sender, data.timestamp], (error, result) => {
       if (error) {
         console.error(error)
-        res.status(500).end()
-      } else if (result.rows.length <= 0) {
-        res.status(404).end()
-      } else {
-        const messageWithAuthSecretEncrypted = result.rows[0].payload
-        const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(data.base64Key)
-        if (OtpCrypto.decrypt(messageWithAuthSecretEncrypted, authSecretKey).plaintextDecrypted !== AUTH_SECRET) {
-          res.status(200).end() // Do not let attacker know their supplied secret was incorrect
-          return
-        }
-        client.query('DELETE FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' <= $2', [data.sender, data.timestamp], (error, result) => {
-          if (error) {
-            console.error(error)
-            res.status(500).end()
-          } else {
-            res.status(200).end()
-          }
-        })
+        return res.status(500).end()
       }
+      if (result.rows.length <= 0) {
+        return res.status(404).end()
+      }
+      const messageWithAuthSecretEncrypted = result.rows[0].payload
+      const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(data.base64Key)
+      if (OtpCrypto.decrypt(messageWithAuthSecretEncrypted, authSecretKey).plaintextDecrypted !== AUTH_SECRET) {
+        return res.status(200).end() // Do not let attacker know their supplied secret was incorrect
+      }
+      client.query('DELETE FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' <= $2', [data.sender, data.timestamp], (error, result) => {
+        if (error) {
+          console.error(error)
+          return res.status(500).end()
+        }
+        return res.status(200).end()
+      })
     })
   })
 
 app.get('*', (req, res) => {
-  res.status(404).end()
+  return res.status(404).end()
 })
 
 app.listen(app.get('port'), () => {

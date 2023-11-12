@@ -34,7 +34,7 @@ app.get('/messages/:receiver',
   (req, res) => {
     const validation = validationResult(req)
     if (!validation.isEmpty()) {
-      return res.status(400).send({ errors: validation.array() })
+      return res.status(400).json({ errors: validation.array() })
     }
     const data = matchedData(req)
 
@@ -59,7 +59,7 @@ app.post('/messages',
   (req, res) => {
     const validation = validationResult(req)
     if (!validation.isEmpty()) {
-      return res.status(400).send({ errors: validation.array() })
+      return res.status(400).json({ errors: validation.array() })
     }
     const data = matchedData(req)
 
@@ -83,7 +83,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
   (req, res) => {
     const validation = validationResult(req)
     if (!validation.isEmpty()) {
-      return res.status(400).send({ errors: validation.array() })
+      return res.status(400).json({ errors: validation.array() })
     }
     const data = matchedData(req)
 

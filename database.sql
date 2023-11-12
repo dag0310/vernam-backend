@@ -8,3 +8,6 @@ CREATE TABLE message (
   PRIMARY KEY(sender, timestamp)
 );
 
+CREATE INDEX idx_receiver ON message(receiver);
+
+CREATE INDEX idx_timestamp ON message(timestamp);

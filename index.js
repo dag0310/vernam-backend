@@ -75,9 +75,9 @@ app.post('/messages',
   })
 
 app.delete('/messages/:sender/:timestamp/:base64Key',
-  body('sender').isString().notEmpty(),
-  body('timestamp').isInt(),
-  body('base64Key').isBase64().notEmpty(),
+  param('sender').isString().notEmpty(),
+  param('timestamp').isInt(),
+  param('base64Key').isBase64().notEmpty(),
   (req, res) => {
     const validation = validationResult(req)
     if (!validation.isEmpty()) {

@@ -32,7 +32,7 @@ const sqlStringReturning = 'sender, receiver, payload, ' + timestampClause + ' A
 app.get('/messages/:receiver',
 param('receiver').isString().notEmpty(),
 query('timestamp').optional().isInt(),
-function (req, res) {
+(req, res) => {
   const validation = validationResult(req);
   if (!validation.isEmpty()) {
     return res.status(400).send({ errors: validation.array() });
@@ -42,7 +42,7 @@ function (req, res) {
   const timestamp = (data.timestamp != null) ? data.timestamp : 0
 
   const sqlQueryString = 'SELECT ' + sqlStringReturning + ' FROM message WHERE receiver = $1 AND ' + timestampClause + ' > $2 ORDER BY sender ASC, timestamp ASC'
-  client.query(sqlQueryString, [data.receiver, timestamp], function (error, result) {
+  client.query(sqlQueryString, [data.receiver, timestamp], (error, result) => {
     if (error) {
       console.error(error)
       res.status(400).end()
@@ -56,7 +56,7 @@ app.post('/messages',
 body('sender').isByteLength({ max: 100 }).isString().trim().notEmpty(),
 body('receiver').isByteLength({ max: 100 }).isString().trim().notEmpty(),
 body('payload').isByteLength({ max: 1024 * 1024 }).isBase64().notEmpty(),
-function (req, res) {
+(req, res) => {
   const validation = validationResult(req);
   if (!validation.isEmpty()) {
     return res.status(400).send({ errors: validation.array() });
@@ -64,7 +64,7 @@ function (req, res) {
   const data = matchedData(req)
 
   const sqlQueryString = 'INSERT INTO message (sender, receiver, payload) VALUES ($1, $2, $3) RETURNING ' + sqlStringReturning
-  client.query(sqlQueryString, [data.sender, data.receiver, data.payload], function (error, result) {
+  client.query(sqlQueryString, [data.sender, data.receiver, data.payload], (error, result) => {
     if (error || result.rows.length <= 0) {
       console.error(error)
       res.status(400).end()
@@ -78,7 +78,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
 body('sender').isString().notEmpty(),
 body('timestamp').isInt(),
 body('base64Key').isBase64().notEmpty(),
-function (req, res) {
+(req, res) => {
   const validation = validationResult(req);
   if (!validation.isEmpty()) {
     return res.status(400).send({ errors: validation.array() });
@@ -86,7 +86,7 @@ function (req, res) {
   const data = matchedData(req)
 
   const sqlSelectionString = 'FROM message WHERE sender = $1 AND ' + timestampClause + ' = $2'
-  client.query('SELECT payload ' + sqlSelectionString, [data.sender, data.timestamp], function (error, result) {
+  client.query('SELECT payload ' + sqlSelectionString, [data.sender, data.timestamp], (error, result) => {
     if (error || result.rows.length <= 0) {
       console.error(error)
       res.status(400).end()
@@ -97,7 +97,7 @@ function (req, res) {
         res.status(200).end()
         return
       }
-      client.query('DELETE ' + sqlSelectionString, queryParams, function (error, result) {
+      client.query('DELETE ' + sqlSelectionString, queryParams, (error, result) => {
         if (error) {
           console.error(error)
           res.status(400).end()
@@ -109,10 +109,10 @@ function (req, res) {
   })
 })
 
-app.get('*', function (req, res) {
+app.get('*', (req, res) => {
   res.status(404).end()
 })
 
-app.listen(app.get('port'), function () {
+app.listen(app.get('port'), () => {
   console.log('Node app is running on port', app.get('port'))
 })

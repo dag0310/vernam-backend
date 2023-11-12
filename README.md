@@ -42,6 +42,7 @@ DELETE /messages/bd8ebf34-4214-46a7-ab55-60c4eee0c20d/1519322973101/KEY=
 Manage [vernam-backend on fly.io](https://fly.io/apps/vernam-backend).
 
 ### Setup
+- Set CORS origin: `fly secrets set CORS_ORIGIN=https://example.com`
 - Set DB URL: `fly secrets set DATABASE_URL=postgres://example.com/mydb`
 - Verify: `fly secrets list`
 

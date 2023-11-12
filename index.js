@@ -24,7 +24,10 @@ client.connect()
 
 app.set('port', process.env.PORT || '3000')
 
-app.use(cors({ maxAge: 600 }))
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || false,
+  maxAge: 600,
+}))
 
 app.use(express.json())
 

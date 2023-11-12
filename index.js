@@ -45,7 +45,7 @@ app.get('/messages/:receiver',
     client.query(sqlQueryString, sqlQueryParams, (error, result) => {
       if (error) {
         console.error(error)
-        res.status(400).end()
+        res.status(500).end()
       } else {
         res.status(200).json(result.rows)
       }
@@ -67,7 +67,7 @@ app.post('/messages',
     client.query(sqlQueryString, [data.sender, data.receiver, data.payload], (error, result) => {
       if (error || result.rows.length <= 0) {
         console.error(error)
-        res.status(400).end()
+        res.status(500).end()
       } else {
         res.status(201).json(result.rows[0])
       }
@@ -100,7 +100,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
         client.query('DELETE ' + sqlSelectionString, [data.sender, data.timestamp], (error, result) => {
           if (error) {
             console.error(error)
-            res.status(400).end()
+            res.status(500).end()
           } else {
             res.status(200).end()
           }

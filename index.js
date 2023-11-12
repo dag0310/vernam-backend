@@ -110,7 +110,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
     })
   })
 
-app.get('*', (req, res) => {
+app.all('*', (req, res) => {
   return res.status(404).end()
 })
 

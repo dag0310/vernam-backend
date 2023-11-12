@@ -6,7 +6,7 @@ import OtpCrypto from 'otp-crypto'
 import 'dotenv/config'
 
 const { Client, types } = pg
-const { body, param, query, validationResult, matchedData } = expressValidator
+const { body, param, query, matchedData, validationResult } = expressValidator
 
 const app = express()
 

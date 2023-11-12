@@ -1,6 +1,6 @@
 {
   "name": "vernam-backend",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Vernam Backend API",
   "engines": {
     "node": "18.15.0"

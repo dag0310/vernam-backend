@@ -97,7 +97,7 @@ body('base64Key').isBase64().notEmpty(),
         res.status(200).end()
         return
       }
-      client.query('DELETE ' + sqlSelectionString, queryParams, (error, result) => {
+        client.query('DELETE ' + sqlSelectionString, [data.sender, data.timestamp], (error, result) => {
         if (error) {
           console.error(error)
           res.status(400).end()

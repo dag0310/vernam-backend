@@ -8,9 +8,11 @@ import 'dotenv/config'
 const { Client, types } = pg
 const { body, param, query, matchedData, validationResult } = expressValidator
 
-const app = express()
-
 const AUTH_SECRET = 'VERNAM'
+const SQL_TIMESTAMP_CLAUSE = 'CAST(floor(EXTRACT(EPOCH FROM timestamp) * 1000) AS BIGINT)'
+const SQL_STRING_RETURNING = 'sender, receiver, payload, ' + SQL_TIMESTAMP_CLAUSE + ' AS timestamp'
+
+const app = express()
 
 types.setTypeParser(20, parseInt) // Parse timestamp to number instead of string, type 20 = BigInt
 
@@ -26,9 +28,6 @@ app.use(cors({ maxAge: 600 }))
 
 app.use(express.json())
 
-const timestampClause = 'CAST(floor(EXTRACT(EPOCH FROM timestamp) * 1000) AS BIGINT)'
-const sqlStringReturning = 'sender, receiver, payload, ' + timestampClause + ' AS timestamp'
-
 app.get('/messages/:receiver',
   param('receiver').isString().notEmpty(),
   query('timestamp').optional().isInt(),
@@ -39,10 +38,11 @@ app.get('/messages/:receiver',
     }
     const data = matchedData(req)
 
-    const timestamp = (data.timestamp != null) ? data.timestamp : 0
+    const sqlTimestampClause = (data.timestamp != null) ? ' AND ' + SQL_TIMESTAMP_CLAUSE + ' > $2' : ''
+    const sqlQueryParams = (data.timestamp != null) ? [data.receiver, data.timestamp] : [data.receiver]
 
-    const sqlQueryString = 'SELECT ' + sqlStringReturning + ' FROM message WHERE receiver = $1 AND ' + timestampClause + ' > $2 ORDER BY sender ASC, timestamp ASC'
-    client.query(sqlQueryString, [data.receiver, timestamp], (error, result) => {
+    const sqlQueryString = 'SELECT ' + SQL_STRING_RETURNING + ' FROM message WHERE receiver = $1' + sqlTimestampClause + ' ORDER BY sender ASC, timestamp ASC'
+    client.query(sqlQueryString, sqlQueryParams, (error, result) => {
       if (error) {
         console.error(error)
         res.status(400).end()
@@ -63,7 +63,7 @@ app.post('/messages',
     }
     const data = matchedData(req)
 
-    const sqlQueryString = 'INSERT INTO message (sender, receiver, payload) VALUES ($1, $2, $3) RETURNING ' + sqlStringReturning
+    const sqlQueryString = 'INSERT INTO message (sender, receiver, payload) VALUES ($1, $2, $3) RETURNING ' + SQL_STRING_RETURNING
     client.query(sqlQueryString, [data.sender, data.receiver, data.payload], (error, result) => {
       if (error || result.rows.length <= 0) {
         console.error(error)
@@ -85,7 +85,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
     }
     const data = matchedData(req)
 
-    const sqlSelectionString = 'FROM message WHERE sender = $1 AND ' + timestampClause + ' = $2'
+    const sqlSelectionString = 'FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' = $2'
     client.query('SELECT payload ' + sqlSelectionString, [data.sender, data.timestamp], (error, result) => {
       if (error || result.rows.length <= 0) {
         console.error(error)

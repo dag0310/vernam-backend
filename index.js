@@ -1,10 +1,12 @@
-import pkg from 'pg';
+import pg from 'pg';
 import express from 'express'
+import expressValidator from 'express-validator'
 import cors from 'cors'
 import OtpCrypto from 'otp-crypto'
 import 'dotenv/config'
 
-const { Client, types } = pkg
+const { Client, types } = pg
+const { body, param, validationResult, matchedData } = expressValidator
 
 const app = express()
 
@@ -27,10 +29,17 @@ app.use(express.json())
 const timestampClause = 'CAST(floor(EXTRACT(EPOCH FROM timestamp) * 1000) AS BIGINT)'
 const sqlStringReturning = 'sender, receiver, payload, ' + timestampClause + ' AS timestamp'
 
-app.get('/messages/:receiver', function (request, response) {
+app.get('/messages/:receiver',
+param('receiver').isString().notEmpty(),
+function (request, response) {
+  const validation = validationResult(request);
+  if (!validation.isEmpty()) {
+    return response.status(400).send({ errors: validation.array() });
+  }
+  const data = matchedData(request)
+
   const sqlQueryString = 'SELECT ' + sqlStringReturning + ' FROM message WHERE receiver = $1 ORDER BY sender ASC, timestamp ASC'
-  const queryParams = [request.params.receiver]
-  client.query(sqlQueryString, queryParams, function (error, result) {
+  client.query(sqlQueryString, [data.receiver], function (error, result) {
     if (error) {
       console.error(error)
       response.status(400).end()
@@ -40,10 +49,19 @@ app.get('/messages/:receiver', function (request, response) {
   })
 })
 
-app.post('/messages', function (request, response) {
+app.post('/messages',
+body('sender').isByteLength({ max: 100 }).isString().trim().notEmpty(),
+body('receiver').isByteLength({ max: 100 }).isString().trim().notEmpty(),
+body('payload').isByteLength({ max: 1024 * 1024 }).isBase64().notEmpty(),
+function (request, response) {
+  const validation = validationResult(request);
+  if (!validation.isEmpty()) {
+    return response.status(400).send({ errors: validation.array() });
+  }
+  const data = matchedData(request)
+
   const sqlQueryString = 'INSERT INTO message (sender, receiver, payload) VALUES ($1, $2, $3) RETURNING ' + sqlStringReturning
-  const queryParams = [request.body.sender, request.body.receiver, request.body.payload]
-  client.query(sqlQueryString, queryParams, function (error, result) {
+  client.query(sqlQueryString, [data.sender, data.receiver, data.payload], function (error, result) {
     if (error || result.rows.length <= 0) {
       console.error(error)
       response.status(400).end()
@@ -53,16 +71,25 @@ app.post('/messages', function (request, response) {
   })
 })
 
-app.delete('/messages/:sender/:timestamp/:base64Key', function (request, response) {
+app.delete('/messages/:sender/:timestamp/:base64Key',
+body('sender').isString().notEmpty(),
+body('timestamp').isInt(),
+body('base64Key').isBase64().notEmpty(),
+function (request, response) {
+  const validation = validationResult(request);
+  if (!validation.isEmpty()) {
+    return response.status(400).send({ errors: validation.array() });
+  }
+  const data = matchedData(request)
+
   const sqlSelectionString = 'FROM message WHERE sender = $1 AND ' + timestampClause + ' = $2'
-  const queryParams = [request.params.sender, request.params.timestamp]
-  client.query('SELECT payload ' + sqlSelectionString, queryParams, function (error, result) {
+  client.query('SELECT payload ' + sqlSelectionString, [data.sender, data.timestamp], function (error, result) {
     if (error || result.rows.length <= 0) {
       console.error(error)
       response.status(400).end()
     } else {
       const messageWithAuthSecretEncrypted = result.rows[0].payload
-      const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(request.params.base64Key)
+      const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(data.base64Key)
       if (OtpCrypto.decrypt(messageWithAuthSecretEncrypted, authSecretKey).plaintextDecrypted !== AUTH_SECRET) {
         response.status(200).end()
         return

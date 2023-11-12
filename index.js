@@ -47,7 +47,7 @@ app.get('/messages/:receiver',
         console.error(error)
         res.status(400).end()
       } else {
-        res.json(result.rows)
+        res.status(200).json(result.rows)
       }
     })
   })
@@ -69,7 +69,7 @@ app.post('/messages',
         console.error(error)
         res.status(400).end()
       } else {
-        res.json(result.rows[0])
+        res.status(201).json(result.rows[0])
       }
     })
   })

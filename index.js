@@ -6,7 +6,7 @@ import OtpCrypto from 'otp-crypto'
 import 'dotenv/config'
 
 const { Client, types } = pg
-const { body, param, validationResult, matchedData } = expressValidator
+const { body, param, query, validationResult, matchedData } = expressValidator
 
 const app = express()
 
@@ -31,6 +31,7 @@ const sqlStringReturning = 'sender, receiver, payload, ' + timestampClause + ' A
 
 app.get('/messages/:receiver',
 param('receiver').isString().notEmpty(),
+query('timestamp').optional().isInt(),
 function (request, response) {
   const validation = validationResult(request);
   if (!validation.isEmpty()) {
@@ -38,8 +39,10 @@ function (request, response) {
   }
   const data = matchedData(request)
 
-  const sqlQueryString = 'SELECT ' + sqlStringReturning + ' FROM message WHERE receiver = $1 ORDER BY sender ASC, timestamp ASC'
-  client.query(sqlQueryString, [data.receiver], function (error, result) {
+  const timestamp = (data.timestamp != null) ? data.timestamp : 0
+
+  const sqlQueryString = 'SELECT ' + sqlStringReturning + ' FROM message WHERE receiver = $1 AND ' + timestampClause + ' > $2 ORDER BY sender ASC, timestamp ASC'
+  client.query(sqlQueryString, [data.receiver, timestamp], function (error, result) {
     if (error) {
       console.error(error)
       response.status(400).end()

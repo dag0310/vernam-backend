@@ -87,8 +87,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
     }
     const data = matchedData(req)
 
-    const sqlSelectionString = 'FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' = $2'
-    client.query('SELECT payload ' + sqlSelectionString, [data.sender, data.timestamp], (error, result) => {
+    client.query('SELECT payload FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' = $2', [data.sender, data.timestamp], (error, result) => {
       if (error) {
         console.error(error)
         res.status(500).end()
@@ -101,7 +100,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
           res.status(200).end() // Do not let attacker know their supplied secret was incorrect
           return
         }
-        client.query('DELETE ' + sqlSelectionString, [data.sender, data.timestamp], (error, result) => {
+        client.query('DELETE FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' <= $2', [data.sender, data.timestamp], (error, result) => {
           if (error) {
             console.error(error)
             res.status(500).end()

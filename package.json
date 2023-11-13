@@ -3,7 +3,7 @@
   "version": "1.3.0",
   "description": "Vernam Backend API",
   "engines": {
-    "node": "18.15.0"
+    "node": "20.9.0"
   },
   "main": "index.js",
   "type": "module",

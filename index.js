@@ -9,8 +9,6 @@ const { Client, types } = pg
 const { body, param, query, matchedData, validationResult } = expressValidator
 
 const AUTH_SECRET = 'VERNAM'
-const SQL_TIMESTAMP_CLAUSE = 'CAST(floor(EXTRACT(EPOCH FROM timestamp) * 1000) AS BIGINT)'
-const SQL_STRING_RETURNING = 'sender, receiver, payload, ' + SQL_TIMESTAMP_CLAUSE + ' AS timestamp'
 
 const app = express()
 
@@ -41,11 +39,9 @@ app.get('/messages/:receiver',
     }
     const data = matchedData(req)
 
-    const [sqlTimestampClause, sqlQueryParams] = (data.timestamp != null)
-      ? [' AND ' + SQL_TIMESTAMP_CLAUSE + ' > $2', [data.receiver, data.timestamp]]
-      : ['', [data.receiver]]
+    const [sqlTimestampClause, sqlQueryParams] = (data.timestamp != null) ? [' AND timestamp > $2', [data.receiver, data.timestamp]] : ['', [data.receiver]]
 
-    const sqlQueryString = 'SELECT ' + SQL_STRING_RETURNING + ' FROM message WHERE receiver = $1' + sqlTimestampClause + ' ORDER BY sender ASC, timestamp ASC'
+    const sqlQueryString = 'SELECT sender, receiver, payload, timestamp FROM message WHERE receiver = $1' + sqlTimestampClause + ' ORDER BY sender ASC, timestamp ASC'
     client.query(sqlQueryString, sqlQueryParams, (error, result) => {
       if (error) {
         console.error(error)
@@ -66,8 +62,8 @@ app.post('/messages',
     }
     const data = matchedData(req)
 
-    const sqlQueryString = 'INSERT INTO message (sender, receiver, payload) VALUES ($1, $2, $3) RETURNING ' + SQL_STRING_RETURNING
-    client.query(sqlQueryString, [data.sender, data.receiver, data.payload], (error, result) => {
+    const sqlQueryString = 'INSERT INTO message (sender, receiver, payload, timestamp) VALUES ($1, $2, $3, $4) RETURNING sender, receiver, payload, timestamp'
+    client.query(sqlQueryString, [data.sender, data.receiver, data.payload, new Date().getTime()], (error, result) => {
       if (error) {
         console.error(error)
         return res.status(500).end()
@@ -90,7 +86,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
     }
     const data = matchedData(req)
 
-    client.query('SELECT payload FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' = $2', [data.sender, data.timestamp], (error, result) => {
+    client.query('SELECT payload FROM message WHERE sender = $1 AND timestamp = $2', [data.sender, data.timestamp], (error, result) => {
       if (error) {
         console.error(error)
         return res.status(500).end()
@@ -103,7 +99,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
       if (OtpCrypto.decrypt(messageWithAuthSecretEncrypted, authSecretKey).plaintextDecrypted !== AUTH_SECRET) {
         return res.status(401).end()
       }
-      client.query('DELETE FROM message WHERE sender = $1 AND ' + SQL_TIMESTAMP_CLAUSE + ' <= $2', [data.sender, data.timestamp], (error, result) => {
+      client.query('DELETE FROM message WHERE sender = $1 AND timestamp <= $2', [data.sender, data.timestamp], (error, result) => {
         if (error) {
           console.error(error)
           return res.status(500).end()

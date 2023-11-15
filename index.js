@@ -56,9 +56,9 @@ app.get('/messages/:receiver',
   })
 
 app.post('/messages',
-  body('sender').isByteLength({ max: 100 }).isString().trim().notEmpty(),
-  body('receiver').isByteLength({ max: 100 }).isString().trim().notEmpty(),
-  body('payload').isByteLength({ max: 1024 * 1024 }).isBase64().notEmpty(),
+  body('sender').isString().trim().notEmpty(),
+  body('receiver').isString().trim().notEmpty(),
+  body('payload').isBase64().notEmpty(),
   (req, res) => {
     const validation = validationResult(req)
     if (!validation.isEmpty()) {

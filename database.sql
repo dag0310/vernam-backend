@@ -1,9 +1,9 @@
 DROP TABLE IF EXISTS message;
 
 CREATE TABLE message (
-  sender text NOT NULL,
-  receiver text NOT NULL,
-  payload text NOT NULL,
+  sender varchar(100) NOT NULL,
+  receiver varchar(100) NOT NULL,
+  payload varchar(1000000) NOT NULL,
   timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(sender, timestamp)
 );

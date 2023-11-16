@@ -8,7 +8,7 @@ import 'dotenv/config'
 const { Client, types } = pg
 const { body, param, query, matchedData, validationResult } = expressValidator
 
-const AUTH_SECRET = 'VERNAM'
+const AUTH_PREAMBLE = 'VERNAM'
 
 const app = express()
 
@@ -94,9 +94,9 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
       if (result.rows.length <= 0) {
         return res.status(404).end()
       }
-      const messageWithAuthSecretEncrypted = result.rows[0].payload
-      const authSecretKey = OtpCrypto.encryptedDataConverter.base64ToBytes(data.base64Key)
-      if (OtpCrypto.decrypt(messageWithAuthSecretEncrypted, authSecretKey).plaintextDecrypted !== AUTH_SECRET) {
+      const paramByteKey = OtpCrypto.encryptedDataConverter.base64ToBytes(data.base64Key)
+      const decryptedPayloadUsingParamByteKey = OtpCrypto.decrypt(result.rows[0].payload, paramByteKey)
+      if (decryptedPayloadUsingParamByteKey.plaintextDecrypted !== AUTH_PREAMBLE) {
         return res.status(401).end()
       }
       client.query('DELETE FROM message WHERE sender = $1 AND timestamp <= $2', [data.sender, data.timestamp], (error, result) => {

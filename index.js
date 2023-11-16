@@ -99,7 +99,7 @@ app.delete('/messages/:sender/:timestamp/:base64Key',
       if (decryptedPayloadUsingParamByteKey.plaintextDecrypted !== AUTH_PREAMBLE) {
         return res.status(401).end()
       }
-      client.query('DELETE FROM message WHERE sender = $1 AND timestamp <= $2', [data.sender, data.timestamp], (error, result) => {
+      client.query('DELETE FROM message WHERE sender = $1 AND timestamp = $2', [data.sender, data.timestamp], (error, result) => {
         if (error) {
           console.error(error)
           return res.status(500).end()

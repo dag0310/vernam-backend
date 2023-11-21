@@ -3,48 +3,30 @@
 Backend for the [Vernam](https://github.com/dag0310/vernam) perfect secrecy messenger app.
 
 ## API
-```
-POST /messages
-Request body:
-{
-  "sender": "bd8ebf34-4214-46a7-ab55-60c4eee0c20d",
-  "receiver": "873e55b9-5f40-43f2-b026-d4867511810f",
-  "payload": "DEF=="
-}
-Response body:
-{
-  "sender": "bd8ebf34-4214-46a7-ab55-60c4eee0c20d",
-  "receiver": "873e55b9-5f40-43f2-b026-d4867511810f",
-  "payload": "DEF==",
-  "timestamp": 1519322973101
-}
 
-GET /messages/873e55b9-5f40-43f2-b026-d4867511810f
-Response body:
-{
-  "sender": "bd8ebf34-4214-46a7-ab55-60c4eee0c20d",
-  "receiver": "873e55b9-5f40-43f2-b026-d4867511810f",
-  "payload": "DEF==",
-  "timestamp": 1519322973101
-}
-
-DELETE /messages/bd8ebf34-4214-46a7-ab55-60c4eee0c20d/1519322973101/KEY=
-*No response body*
-```
+Please check the Express HTTP request endpoints in `index.js`
 
 ## Local development
 
-- Use a (local) development database. The fly.io database does not have external access enabled.
+- Use a (local) development database. The Fly.io database does not have external access enabled by default.
+- VAPID environment variables are optionally for [web push notification](https://github.com/web-push-libs/web-push#command-line) support
+- Set environment variables in `.env` file according to Fly.io template below, without `fly secrets set`
 - Start dev server: `npm run dev`
 
-## fly.io
+## Fly.io setup
 
-Manage [vernam-backend on fly.io](https://fly.io/apps/vernam-backend).
+[Fly.io Dashboard](https://fly.io/dashboard)
 
-### Setup
-- Set CORS origin: `fly secrets set CORS_ORIGIN=https://example.com`
-- Set DB URL: `fly secrets set DATABASE_URL=postgres://example.com/mydb`
-- Verify: `fly secrets list`
+### Environment variables
+```bash
+fly secrets set CORS_ORIGIN=https://example.com
+fly secrets set DATABASE_URL=postgres://example.com/mydb
+fly secrets set VAPID_CONTACT=EMAIL_OR_WEBSITE_STRING
+fly secrets set VAPID_PUBLIC_KEY=BASE64_STRING
+fly secrets set VAPID_PRIVATE_KEY=BASE64_STRING
+```
+
+Verify environment variables: `fly secrets list`
 
 ### Postgres login / Setup DB
 - `fly postgres connect -a vernam-backend-db`

@@ -43,7 +43,7 @@ app.use(cors({
 
 app.use(express.json())
 
-app.get('/messages/:receiver',
+app.get('/messages/:receiver([\\S]{0,})',
   param('receiver').isString().notEmpty(),
   query('timestamp').optional().isInt(),
   (req, res) => {
@@ -113,7 +113,7 @@ app.post('/messages',
     })
   })
 
-app.delete('/messages/:sender/:timestamp/:base64Key',
+app.delete('/messages/:sender/:timestamp/:base64Key([\\S]{0,})',
   param('sender').isString().notEmpty(),
   param('timestamp').isInt(),
   param('base64Key').isBase64().notEmpty(),

@@ -55,7 +55,7 @@ app.get('/messages/:receiver([\\S]{0,})',
 
     const [sqlTimestampClause, sqlQueryParams] = (data.timestamp != null) ? [' AND timestamp > $2', [data.receiver, data.timestamp]] : ['', [data.receiver]]
 
-    const sqlQueryString = 'SELECT sender, receiver, payload, timestamp FROM message WHERE receiver = $1' + sqlTimestampClause + ' ORDER BY sender ASC, timestamp ASC'
+    const sqlQueryString = 'SELECT sender, receiver, payload, timestamp FROM message WHERE receiver = $1' + sqlTimestampClause + ' ORDER BY timestamp ASC'
     client.query(sqlQueryString, sqlQueryParams, (error, result) => {
       if (error) {
         console.error(error)

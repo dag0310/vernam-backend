@@ -81,7 +81,7 @@ fastify.get('/messages/:receiver', {
     return reply.code(200).send(result.rows)
   } catch (error) {
     console.error(error)
-    return reply.code(500).send()
+    return reply.code(500).send(error)
   }
 })
 
@@ -108,7 +108,7 @@ fastify.post('/messages', {
     const result = await client.query(sqlQueryString, sqlQueryParams)
 
     if (result.rows.length <= 0) {
-      return reply.code(500).send()
+      return reply.code(500).send({ message: 'INSERT returned no rows.' })
     }
     const resultRow = result.rows[0]
 
@@ -135,8 +135,11 @@ fastify.post('/messages', {
 
     return reply.code(201).send(resultRow)
   } catch (error) {
+    if (error?.code === '23505') {
+      return reply.code(409).send(error)
+    }
     console.error(error)
-    return reply.code(500).send()
+    return reply.code(500).send(error)
   }
 })
 
@@ -157,14 +160,14 @@ fastify.delete('/messages/:sender/:timestamp/:base64Key', {
     const result = await client.query('SELECT payload FROM message WHERE sender = $1 AND timestamp = $2', [request.params.sender, request.params.timestamp])
 
     if (result.rows.length <= 0) {
-      return reply.code(404).send()
+      return reply.code(404).send({ message: 'SELECT returned no rows.' })
     }
     const resultRow = result.rows[0]
 
     const paramByteKey = OtpCrypto.encryptedDataConverter.base64ToBytes(request.params.base64Key)
     const decryptedPayloadUsingParamByteKey = OtpCrypto.decrypt(resultRow.payload, paramByteKey)
     if (decryptedPayloadUsingParamByteKey.plaintextDecrypted !== AUTH_PREAMBLE) {
-      return reply.code(401).send()
+      return reply.code(401).send({ message: 'Message authentication failed.' })
     }
 
     await client.query('DELETE FROM message WHERE sender = $1 AND timestamp = $2', [request.params.sender, request.params.timestamp])
@@ -172,7 +175,7 @@ fastify.delete('/messages/:sender/:timestamp/:base64Key', {
     return reply.code(200).send()
   } catch (error) {
     console.error(error)
-    return reply.code(500).send()
+    return reply.code(500).send(error)
   }
 })
 
@@ -189,7 +192,7 @@ fastify.get('/push-key', {
   },
 }, async (request, reply) => {
   if (process.env.VAPID_PUBLIC_KEY == null) {
-    return reply.code(500).send()
+    return reply.code(500).send({ message: 'No VAPID public key set.' })
   }
   return reply.code(200).send({ vapidPublicKey: process.env.VAPID_PUBLIC_KEY })
 })
@@ -211,15 +214,11 @@ fastify.post('/push-subscription', {
     return reply.code(201).send()
   } catch (error) {
     if (error?.code === '23505') {
-      return reply.code(409).send()
+      return reply.code(409).send(error)
     }
     console.error(error)
-    return reply.code(500).send()
+    return reply.code(500).send(error)
   }
-})
-
-fastify.setNotFoundHandler((request, reply) => {
-  return reply.code(404).send()
 })
 
 ;(async () => {

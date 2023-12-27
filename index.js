@@ -108,7 +108,7 @@ fastify.post('/messages', {
     const result = await client.query(sqlQueryString, sqlQueryParams)
 
     if (result.rows.length <= 0) {
-      return reply.code(500).send({ message: 'INSERT returned no rows.' })
+      return reply.code(500).send({ message: 'Message creation failed.' })
     }
     const resultRow = result.rows[0]
 
@@ -160,7 +160,7 @@ fastify.delete('/messages/:sender/:timestamp/:base64Key', {
     const result = await client.query('SELECT payload FROM message WHERE sender = $1 AND timestamp = $2', [request.params.sender, request.params.timestamp])
 
     if (result.rows.length <= 0) {
-      return reply.code(404).send({ message: 'SELECT returned no rows.' })
+      return reply.code(404).send({ message: 'Message not found.' })
     }
     const resultRow = result.rows[0]
 

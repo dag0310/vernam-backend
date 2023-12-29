@@ -24,6 +24,9 @@ if (process.env.VAPID_CONTACT && process.env.VAPID_PUBLIC_KEY && process.env.VAP
 
 types.setTypeParser(20, parseInt) // Parse timestamp to number instead of string, type 20 = BigInt
 
+if (process.env.DATABASE_URL == null) {
+  console.error('Environment variable DATABASE_URL not set.')
+}
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
 })
@@ -32,6 +35,9 @@ client.connect()
 
 const fastify = Fastify()
 
+if (process.env.CORS_ORIGIN == null) {
+  console.error('Environment variable CORS_ORIGIN not set.')
+}
 fastify.register(fastifyCors, {
   origin: process.env.CORS_ORIGIN || false,
   maxAge: 600,

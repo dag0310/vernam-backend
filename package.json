@@ -9,7 +9,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "node index.js"
+    "dev": "node --env-file=.env index.js"
   },
   "repository": {
     "type": "git",
@@ -31,7 +31,6 @@
   ],
   "license": "AGPLv3",
   "dependencies": {
-    "dotenv": "^16.3.1",
     "fastify": "^4.24.3",
     "@fastify/cors": "^8.4.1",
     "otp-crypto": "^6.1.0",

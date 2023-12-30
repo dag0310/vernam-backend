@@ -45,12 +45,14 @@ fastify.register(fastifyCors, {
 const responseMessageSchema = {
   type: 'object',
   properties: {
+    id: { type: 'string' },
     sender: { type: 'string' },
     receiver: { type: 'string' },
     payload: { type: 'string' },
     timestamp: { type: 'integer' },
   }
 }
+const sqlMessageColumns = Object.keys(responseMessageSchema.properties).join(', ')
 
 fastify.get('/messages/:receiver', {
   schema: {
@@ -79,7 +81,7 @@ fastify.get('/messages/:receiver', {
     ? [' AND timestamp > $2', [request.params.receiver, request.query.timestamp]]
     : ['', [request.params.receiver]]
 
-  const sqlQueryString = 'SELECT sender, receiver, payload, timestamp FROM message WHERE receiver = $1' + sqlTimestampClause + ' ORDER BY timestamp ASC'
+  const sqlQueryString = 'SELECT ' + sqlMessageColumns + ' FROM message WHERE receiver = $1' + sqlTimestampClause + ' ORDER BY timestamp ASC'
 
   try {
     const result = await client.query(sqlQueryString, sqlQueryParams)
@@ -95,19 +97,26 @@ fastify.post('/messages', {
     body: {
       type: 'object',
       properties: {
+        id: { type: 'string', format: 'uuid' },
         sender: { type: 'string', format: 'uuid' },
         receiver: { type: 'string', format: 'uuid' },
         payload: { type: 'string', format: 'byte' },
       },
-      required: ['sender', 'receiver', 'payload'],
+      required: ['id', 'sender', 'receiver', 'payload'],
     },
     response: {
+      200: responseMessageSchema,
       201: responseMessageSchema,
     },
   },
 }, async (request, reply) => {
-  const sqlQueryString = 'INSERT INTO message (sender, receiver, payload, timestamp) VALUES ($1, $2, $3, $4) RETURNING sender, receiver, payload, timestamp'
-  const sqlQueryParams = [request.body.sender, request.body.receiver, request.body.payload, new Date().getTime()]
+  const result = await client.query('SELECT ' + sqlMessageColumns + ' FROM message WHERE id = $1', [request.body.id])
+  if (result.rows.length > 0) {
+    return reply.code(200).send(result.rows[0])
+  }
+
+  const sqlQueryString = 'INSERT INTO message (id, sender, receiver, payload, timestamp) VALUES ($1, $2, $3, $4, $5) RETURNING ' + sqlMessageColumns
+  const sqlQueryParams = [request.body.id, request.body.sender, request.body.receiver, request.body.payload, new Date().getTime()]
 
   try {
     const result = await client.query(sqlQueryString, sqlQueryParams)
@@ -148,21 +157,20 @@ fastify.post('/messages', {
   }
 })
 
-fastify.delete('/messages/:sender/:timestamp/:base64Key', {
+fastify.delete('/messages/:id/:base64Key', {
   schema: {
     params: {
       type: 'object',
       properties: {
-        sender: { type: 'string' },
-        timestamp: { type: 'integer' },
+        id: { type: 'string', format: 'uuid' },
         base64Key: { type: 'string', format: 'byte' },
       },
-      required: ['sender', 'timestamp', 'base64Key'],
+      required: ['id', 'base64Key'],
     },
   },
 }, async (request, reply) => {
   try {
-    const result = await client.query('SELECT payload FROM message WHERE sender = $1 AND timestamp = $2', [request.params.sender, request.params.timestamp])
+    const result = await client.query('SELECT payload FROM message WHERE id = $1', [request.params.id])
 
     if (result.rows.length <= 0) {
       return reply.code(404).send({ message: 'Message not found.' })
@@ -175,7 +183,7 @@ fastify.delete('/messages/:sender/:timestamp/:base64Key', {
       return reply.code(401).send({ message: 'Message authentication failed.' })
     }
 
-    await client.query('DELETE FROM message WHERE sender = $1 AND timestamp = $2', [request.params.sender, request.params.timestamp])
+    await client.query('DELETE FROM message WHERE id = $1', [request.params.id])
 
     return reply.code(200).send()
   } catch (error) {
